@@ -1,0 +1,10 @@
+{
+  "source": "https://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice",
+  "name": "3d",
+  "dayStart": "2024-04-13",
+  "dayEnd": "2026-04-13",
+  "pageNo": 1,
+  "pageSize": 1000,
+  "systemType": "PC",
+  "note": "两年区间全量抓取配置，优先通过 browser 会话访问官方接口。"
+}

@@ -1,0 +1,18 @@
+{
+  "source": "中国福彩网官方接口",
+  "endpoint": "https://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice",
+  "lottery": "福彩3D",
+  "requested_dayStart": "2004-01-01",
+  "requested_dayEnd": "2026-04-13",
+  "actual_total_records": 4597,
+  "first_issue": "2013002",
+  "last_issue": "2026092",
+  "first_date": "2013-01-02",
+  "last_date": "2026-04-12",
+  "train_history_path": "/var/minis/shared/fucai3d/history_official_all_train.json",
+  "full_history_path": "/var/minis/shared/fucai3d/history_official_all_full.json",
+  "features_path": "/var/minis/shared/fucai3d/history_official_all_features.json",
+  "features_csv_path": "/var/minis/shared/fucai3d/history_official_all_features.csv",
+  "jsonl_path": "/var/minis/shared/fucai3d/history_official_all_full.jsonl",
+  "feature_columns": 86
+}
