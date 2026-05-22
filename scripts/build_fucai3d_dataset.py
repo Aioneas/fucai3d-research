@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import csv
 import json
+import os
 import re
 from collections import Counter, deque
 from datetime import UTC, datetime, date
 from pathlib import Path
 
-SRC = Path('/var/minis/offloads/browser_use_1776018225_call_pSC.txt')
-OUT_DIR = Path('/var/minis/shared/fucai3d')
+ROOT = Path(__file__).resolve().parents[1]
+SRC = Path(os.environ.get('FUCAI3D_2Y_SOURCE', str(ROOT / 'data/raw/official_api_2y_browser_dump.txt')))
+OUT_DIR = Path(os.environ.get('FUCAI3D_OUTPUT_DIR', str(ROOT / 'data/2y')))
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUT_FULL = OUT_DIR / 'history_official_2y_full.json'
@@ -215,6 +217,11 @@ def build_feature_rows(records_full):
 
 
 def main():
+    if not SRC.exists():
+        raise SystemExit(
+            f'source dump not found: {SRC}\n'
+            'Set FUCAI3D_2Y_SOURCE=/path/to/official_api_2y_browser_dump.txt if your dump lives elsewhere.'
+        )
     text = SRC.read_text(encoding='utf-8')
     raw_records = parse_offload(text)
     if len(raw_records) < 600:
