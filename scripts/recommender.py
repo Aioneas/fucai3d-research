@@ -7,8 +7,13 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-BASE_DIR = Path('/var/minis/shared/fucai3d')
-HISTORY_PATH = Path(os.environ.get('FUCAI3D_HISTORY_PATH', str(BASE_DIR / 'history.json')))
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_REPO_HISTORY = ROOT / 'data/all/history_official_all_train.json'
+DEFAULT_SHARED_HISTORY = Path('/var/minis/shared/fucai3d/history.json')
+HISTORY_PATH = Path(os.environ.get(
+    'FUCAI3D_HISTORY_PATH',
+    str(DEFAULT_REPO_HISTORY if DEFAULT_REPO_HISTORY.exists() else DEFAULT_SHARED_HISTORY),
+))
 
 
 def ensure_parent():
@@ -92,6 +97,7 @@ def update_record(issue, date_str, number):
                 'date': date_str,
                 'number': number,
                 'history_size': len(records),
+                'history_path': str(HISTORY_PATH),
             }
     records.append(entry)
     sort_records(records)
@@ -102,6 +108,7 @@ def update_record(issue, date_str, number):
         'date': date_str,
         'number': number,
         'history_size': len(records),
+        'history_path': str(HISTORY_PATH),
     }
 
 
@@ -231,6 +238,7 @@ def bundle(count):
     cold = generate_group(rng, 3, 'cold', freq_map, window, used)
     hot = generate_group(rng, 3, 'hot', freq_map, window, used)
     return {
+        'history_path': str(HISTORY_PATH),
         'history_size': len(records),
         'window_size': len(window),
         'basic_recommendations': [' '.join(map(str, x)) for x in basic],
@@ -258,8 +266,10 @@ def main():
     args = parser.parse_args()
     if args.cmd == 'update':
         out = update_record(args.issue, args.date, args.digits)
-    else:
+    elif args.cmd == 'bundle':
         out = bundle(args.count)
+    else:
+        raise SystemExit('unknown command')
     print(json.dumps(out, ensure_ascii=False, indent=2))
 
 
