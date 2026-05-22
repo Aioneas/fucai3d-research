@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 import json
 import math
-from collections import Counter
+import os
 from pathlib import Path
 
-FEATURES_PATH = Path('/var/minis/shared/fucai3d/history_official_all_features.json')
-OUT_SUMMARY = Path('/var/minis/shared/fucai3d/backtest_walkforward_summary.json')
-OUT_PRED = Path('/var/minis/shared/fucai3d/backtest_latest500_predictions.jsonl')
-OUT_REPORT = Path('/var/minis/shared/fucai3d/backtest_walkforward_report.md')
+ROOT = Path(__file__).resolve().parents[1]
+FEATURES_PATH = Path(os.environ.get('FUCAI3D_FEATURES_PATH', str(ROOT / 'data/all/history_official_all_features.json')))
+OUT_DIR = Path(os.environ.get('FUCAI3D_REPORTS_DIR', str(ROOT / 'reports')))
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+OUT_SUMMARY = OUT_DIR / 'backtest_walkforward_summary.json'
+OUT_PRED = OUT_DIR / 'backtest_latest500_predictions.jsonl'
+OUT_REPORT = OUT_DIR / 'backtest_walkforward_report.md'
 
 REPEAT_TYPES = ['豹子', '组三', '组六']
 SUM_VALUES = list(range(28))
@@ -52,6 +55,11 @@ CANDIDATES = build_candidates()
 
 
 def load_rows():
+    if not FEATURES_PATH.exists():
+        raise SystemExit(
+            f'features file not found: {FEATURES_PATH}\n'
+            'Run scripts/build_fucai3d_all_dataset.py first, or set FUCAI3D_FEATURES_PATH=/path/to/features.json.'
+        )
     rows = json.loads(FEATURES_PATH.read_text(encoding='utf-8'))
     out = []
     for r in rows:
@@ -188,6 +196,8 @@ def empty_metrics(total):
 
 def finalize_metrics(m):
     total = m['total']
+    if total <= 0:
+        raise ValueError('metrics total must be positive')
     out = dict(m)
     for k in ['exact_top1', 'exact_top5', 'exact_top10', 'exact_top20', 'exact_top50', 'group_top20', 'sum_top3', 'span_top3', 'repeat_top1', 'top1_two_pos_hits', 'top1_any_pos_hits']:
         out[k + '_rate'] = round(m[k] / total, 6)
@@ -263,6 +273,8 @@ def main():
     n = len(rows)
     val_size = 500
     test_size = 500
+    if n < val_size + test_size + 1:
+        raise SystemExit(f'not enough rows for walk-forward split: {n}')
     val_start = n - val_size - test_size
     val_end = n - test_size
     test_start = n - test_size
